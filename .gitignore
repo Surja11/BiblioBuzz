@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Virtual environment
+myVenv/
+
+# Django specific
+*.pyc
+db.sqlite3
+*.pyo
+
+# VS Code
+.vscode/
+
+# Environment variables
+.env
+
+# Migrations (optional - only if you don't want to track them)
+**/migrations/*.py
+!**/migrations/__init__.py
