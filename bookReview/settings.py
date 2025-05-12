@@ -130,3 +130,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'review.User'
+
+LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'login'

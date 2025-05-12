@@ -21,9 +21,9 @@ def userRegister(request):
       user = form.save(commit = False)
       user.set_password(form.cleaned_data["password"])
       user.save()
-      messages.success(request,"Registration successful")
       return redirect('login')
-    
+    else:
+      messages.error(request, "Registration Failed")
         
   form = RegistrationForm()
   return render(request, 'review/register.html',{'form': form})
@@ -45,19 +45,18 @@ def userLogin(request):
       print("no email")
     except User.DoesNotExist:
       messages.error(request, "Invalid email or password.")
-      print("user does not exist") 
+    
     
     user = authenticate(request, email = email, password = password)
 
     if user is not None:
       login(request, user)
       return redirect('home')
-    else:
-      print(messages.error)
-      messages.error(request, "Invalid email or password")
+    
   return render(request, 'review/login.html')
 
 def logoutUser(request):
   logout(request)
-  return render(request, 'review/register.html')
+  return redirect('login')
+
 
