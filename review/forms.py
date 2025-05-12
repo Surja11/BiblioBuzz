@@ -25,11 +25,7 @@ class RegistrationForm(forms.ModelForm):
         raise forms.ValidationError("A user with this email already exists")
       
 
-class LoginForm(forms.Form):
-  email = forms.EmailInput()
-  password = forms.PasswordInput()
 
-  fields=['email', 'password']
 
 
 
