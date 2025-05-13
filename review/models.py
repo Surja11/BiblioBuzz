@@ -49,3 +49,41 @@ class User(AbstractBaseUser):
   
   def has_module_perms(self, app_label):
     return self.is_superuser
+
+class Author(models.Model):
+  author_name = models.CharField(max_length=200)
+  bio = models.TextField()
+
+class Genre(models.Model):
+  genre_name = models.CharField(max_length=100)
+
+  def __str__(self):
+    return self.name
+
+
+class Book(models.Model):
+  book_name = models.CharField(max_length= 200)
+  author_name = models.ForeignKey(Author, on_delete=models.CASCADE)
+  publication = models.CharField(max_length = 200)
+  genres = models.ManyToManyField(Genre, blank = True)
+  published_date = models.DateField()
+  short_description = models.TextField()
+  book_img = models.ImageField(upload_to="media/review/images")
+  
+
+class Review(models.Model):
+  book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name = "reviews")
+  user = models.ForeignKey(User, on_delete=models.CASCADE, related_name = "reviews")
+  rating = models.FloatField()
+  comment = models.TextField()
+  created_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
+
+  class Meta:
+    unique_together = ['book', 'user']
+
+class Comment(models.Model):
+  review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name = 'comments')
+  commenter = models.ForeignKey(User, on_delete = models.CASCADE)
+  text = models.TextField()
+  created_at = models.DateTimeField(auto_now_add = True)
