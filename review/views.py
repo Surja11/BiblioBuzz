@@ -1,12 +1,19 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import *
+from .models import *
 from django.contrib.auth import logout,authenticate,login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 @login_required
 def home(request):
-  return render(request, 'review/home.html')
+  books = Book.objects.all()
+  reviews = Review.objects.all()
+  context = {
+    'books': books,
+    'reviews':reviews
+  }
+  return render(request, 'review/home.html',context)
 
 @login_required
 def reviewPage(request, slug):

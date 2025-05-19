@@ -53,17 +53,20 @@ class User(AbstractBaseUser):
 class Author(models.Model):
   author_name = models.CharField(max_length=200)
   bio = models.TextField()
+  def __str__(self):
+    return self.author_name
+
 
 class Genre(models.Model):
   genre_name = models.CharField(max_length=100)
 
   def __str__(self):
-    return self.name
+    return self.genre_name
 
 
 class Book(models.Model):
   book_name = models.CharField(max_length= 200)
-  author_name = models.ForeignKey(Author, on_delete=models.CASCADE)
+  author = models.ForeignKey(Author, on_delete=models.CASCADE)
   publication = models.CharField(max_length = 200)
   genres = models.ManyToManyField(Genre, blank = True)
   published_date = models.DateField()

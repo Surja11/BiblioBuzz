@@ -17,4 +17,18 @@ class UserModelAdmin(UserAdmin):
   ]
   filter_horizontal = []
 
+class AuthorAdmin(admin.ModelAdmin):
+  # model  = Author
+  # list_display=['author_name']
+  search_fields=['author_name']
+
+class BookModelAdmin(admin.ModelAdmin):
+  model = Book
+  list_display = ['book_name']
+  # search_fields=['author_name']
+  autocomplete_fields = ['author']
+
+admin.site.register(Genre)
 admin.site.register(User, UserModelAdmin)
+admin.site.register(Author,AuthorAdmin)
+admin.site.register(Book, BookModelAdmin)
