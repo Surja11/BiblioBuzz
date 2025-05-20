@@ -12,6 +12,7 @@
                     <span class="card-title text-center">{{book.book_name}}</span>
                     <img src="{{book.book_img.url}}" alt="{{book.book_name}}" 
                          class="img-fluid mt-2" style="max-height: 200px; max-width: 180px; object-fit: contain;">
+                         <a class="btn mt-2" style="background-color: #393E46;color:#DFD0B8" href="{%url "reviewPage" book.id %}" >Review</a>
                 </div>
             </div>
         </div>

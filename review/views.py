@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import *
 from .models import *
@@ -15,9 +15,40 @@ def home(request):
   }
   return render(request, 'review/home.html',context)
 
-@login_required
-def reviewPage(request, slug):
-  return render(request, 'review/requestPage.html')
+
+
+def reviewPage(request, id):
+  book = get_object_or_404(Book, id = id)
+  reviews = book.reviews.all()
+  
+  if request.method == "POST":
+    if request.user.is_authenticated:
+      rating = request.POST.get('rating')
+      comment = request.POST.get('comment')
+
+
+      existing_review = Review.objects.filter(book = book, user = request.user).first()
+      if existing_review:
+        messages.errror(request, "You have already reviewed this book.")
+      else:
+        Review.objects.create(
+          book = book,
+          user = request.user,
+          rating = rating,
+          comment = comment
+        )
+        messages.success(request, "Review Successfully Added.")
+        return redirect('reviewPage',id = book.id)
+    else:
+      messages.error(request, "You should be authenticated to post review")
+      return redirect('login')
+
+
+  
+  return render(request, 'review/reviewPage.html',{
+    'book': book,
+    'reviews': reviews
+  })
 
 def userRegister(request):
   if request.method == "POST":
