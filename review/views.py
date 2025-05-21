@@ -5,7 +5,7 @@ from .models import *
 from django.contrib.auth import logout,authenticate,login
 from django.contrib.auth.decorators import login_required
 # Create your views here.
-@login_required
+
 def home(request):
   books = Book.objects.all()
   reviews = Review.objects.all()

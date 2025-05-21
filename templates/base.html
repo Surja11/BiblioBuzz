@@ -39,10 +39,11 @@
             <li><hr class="dropdown-divider"></li>
           
           </ul>
-
+{%if user.is_authenticated%}
           <li class="nav-item">
           <a class="nav-link" style="color: #DFD0B8;"href="#">Profile</a>
         </li>
+        {%endif%}
       
       </ul>
       <form class="d-flex" role="search">
@@ -52,7 +53,11 @@
 
         
       </form>
+      {%if user.is_authenticated%}
       <a href="{%url 'logout'%}" class="btn btn-outline-danger my-2"  style="color: #DFD0B8;" type="submit">Logout</a>
+      {%else%}
+      <a href="{%url 'login'%}" class="btn btn-outline-danger my-2"  style="color: #DFD0B8;" type="submit">Login</a>
+      {%endif%}
     </div>
   </div>
 </nav>

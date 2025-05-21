@@ -2,10 +2,10 @@
 {% block title %}Review Page{% endblock title %}
 {% block body %}
 
-  <div class="container" style="color:#393F46">
-    <h1 class="text-center">{{book.book_name}}</h1>
-    <h4 class="text-center">{{book.author.author_name}}</h4>
-    <div class= row>
+  <div class="container" style="color:rgb(237, 235, 227);">
+    <h1 class="text-center" style="color:#393F46">{{book.book_name}}</h1>
+    <h4 class="text-center" style="color:#393F46">{{book.author.author_name}}</h4>
+    <div class= row style="color:#393F46">
       <div class="col-md-4 my-3 d-flex flex-column align-items-center ">
       <img src="{{book.book_img.url}}" class="img-fluid mt-2" style="max-height: 200px; max-width: 180px; object-fit: contain; " >
       <span class="fw-bold"> Publication : {{book.publication}}</span>
@@ -13,29 +13,30 @@
       <span class="fw-bold"> Average rating : {{book.rating}} stars</span>
       </div>
       <div class="col-md-8 my-3 mt-4">
-        <p>{{book.short_description}}</p>
+        <p style="color:rgb(237, 235, 227);">{{book.short_description}}</p>
       </div>
     </div>
 <hr>
-<h3 class="text-center">Reviews</h3>
+<h3 class="text-center" style="color:#393F46">Reviews</h3>
 
           {%for review in reviews%}
       <div class="row">
-        <span class="fw-bold">{{review.user.username}}</span>
+        <span class="fw-bold" style="color:#393F46">{{review.user.username}}</span>
         
-        <span class="fw-bold">{{review.rating}} stars</span>
-        <p>{{review.comment}}</p>
+        <span class="fw-bold" style="color:#393F46">{{review.rating}} stars</span>
+        <p class = "review collapsed" id = "review{{forloop.counter}}">{{review.comment}}</p>
+        <button class="btn" onclick = "toggleReview('review{{forloop.counter}}', this)">Show more</button>
         <hr>
       </div>
       {%endfor%}
       
-      <h3 class="text-center m-3">Give Your Review</h3>
+      <h3 class="text-center m-3" style="color:#393F46">Give Your Review</h3>
       <hr>
       <div class="container-sm">
         <form method="post" class="form">
           {% csrf_token %}
           <label for="rating">Give Ratings:</label>
-            <select class="form-control" name = "rating">
+            <select class="form-control" name = "rating" style="background-color: #DFD0B8;">
               <option value="1">1<option>
               <option value="2">2<option>
               <option value="3">3<option>
@@ -44,7 +45,7 @@
             </select>
 <br><br>
             <label for="comment">Review</label>
-              <textarea cols=50 rows=6 name = "comment" class="form-control"></textarea>
+              <textarea cols=50 rows=6 name = "comment" style="background-color: #DFD0B8;" class="form-control"></textarea >
               <div class="text-center">
               <input type = "submit"  class="btn m-2" value="Submit" style="background-color: #393E46; color: #DFD0B8">
               </div>
@@ -53,4 +54,29 @@
       </div>      </div>
 
 
+      <script>
+        function toggleReview(id, btn){
+          const review = document.getElementById(id);
+          if(review.classList.contains('collapsed')){
+            review.classList.remove('collapsed');
+            btn.innerText = 'Show less';
+          }
+          else{
+            review.classList.add('collapsed');
+            btn.innerText = 'Show more';
+          }
+        }
+
+      </script>
+
+      <style>
+        .review.collapsed{
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+        }
+
+      </style>
 {%endblock body%}
+
