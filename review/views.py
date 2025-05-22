@@ -4,6 +4,8 @@ from .forms import *
 from .models import *
 from django.contrib.auth import logout,authenticate,login
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+# login_required
 # Create your views here.
 
 def home(request):
@@ -111,5 +113,28 @@ def searchBooks(request):
 
   
 
+def like_review(request, review_id):
+  if request.method == "POST":
+    review = Review.objects.get(id = review_id)
+    review.likes += 1
+    review.save()
+    return JsonResponse({'likes': review.likes})
 
 
+def review_comment(request, review_id):
+  review = Review.objects.get(id = review_id)
+  if request.method == "POST":
+    if request.user.is_authenticated:
+      comment = request.POST.get("comment")
+      print("got comment"+comment)
+      Comment.objects.create(review_id = review_id,commenter=request.user, text = comment)
+      print("comment saved")
+      return JsonResponse({'status': 'success'})
+    return redirect('login')
+  
+
+def get_all_comments(request, review_id):
+  if request.method == "GET":
+    review = Review.objects.get(id  = review_id)
+    comments = review.comments.order_by('-created_at').all()
+    return JsonResponse(list(comments), safe = False)

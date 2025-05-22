@@ -5,7 +5,9 @@
   <div class="container" style="color:rgb(237, 235, 227);">
     <h1 class="text-center" style="color:#393F46">{{book.book_name}}</h1>
     <h4 class="text-center" style="color:#393F46">{{book.author.author_name}}</h4>
-    <div class= row style="color:#393F46">
+
+
+    <div class= "row" style="color:#393F46">
       <div class="col-md-4 my-3 d-flex flex-column align-items-center ">
       <img src="{{book.book_img.url}}" class="img-fluid mt-2" style="max-height: 200px; max-width: 180px; object-fit: contain; " >
       <span class="fw-bold"> Publication : {{book.publication}}</span>
@@ -13,19 +15,53 @@
       <span class="fw-bold"> Average rating : {{book.rating}} stars</span>
       </div>
       <div class="col-md-8 my-3 mt-4">
+        <h4 style="color : #393F46">Description</h4>
         <p style="color:rgb(237, 235, 227);">{{book.short_description}}</p>
       </div>
     </div>
 <hr>
 <h3 class="text-center" style="color:#393F46">Reviews</h3>
+{%if not reviews%}
+<div class="alert alert-info text-center">No reviews yet. Be the first to review!</div>
+{%endif%}
 
           {%for review in reviews%}
-      <div class="row">
+      <div class="review-card mb-2 p-2 rounded">
         <span class="fw-bold" style="color:#393F46">{{review.user.username}}</span>
         
         <span class="fw-bold" style="color:#393F46">{{review.rating}} stars</span>
-        <p class = "review collapsed" id = "review{{forloop.counter}}">{{review.comment}}</p>
-        <button class="btn" onclick = "toggleReview('review{{forloop.counter}}', this)">Show more</button>
+        <p class = "review-text collapsed" id = "review{{forloop.counter}}">{{review.comment}}</p>
+        <button class="btn btn-sm" onclick = "toggleReview('review{{forloop.counter}}', this)">Show more</button>
+
+
+        <div class="d-flex align-items-center mt-2"> 
+          <button class="btn btn-sm me-2 " onclick = "likeReview({{review.id}}, this)">👍Like(<span id="like-count-{{review.id}}">{{review.likes}}</span>)</button>
+
+
+        <button class="btn btn-sm" onclick="toggleCommentBox({{review.id}})">💬Comment</button></div>
+
+
+        <div id ="comment-box-{{review.id}}" class="mt-2" style="display:none;">
+          <div id="comments-{{review.id}}">
+            {%for comment in review.comments.all|slice:":2"%}
+            <div class ="border p-2 mb-1">{{comment.text}}</div>
+
+            {% if review.comments.count > 2 %}
+            <button class="btn btn-link p-0" onclick="showMoreComments({{review.id}}, this)">Show more</button>
+            {% endif %}
+            {%endfor%}
+
+
+          </div>
+
+        <form onsubmit="submitComment(event, {{review.id}})">
+          <textarea name = "comment" class="form-control mb-2" placeholder="Add a comment"></textarea>
+          <button class="btn btn-sm" type="submit"> Post</button>
+          </form>
+          
+        
+        </div>
+       
         <hr>
       </div>
       {%endfor%}
@@ -67,15 +103,73 @@
           }
         }
 
+        function likeReview(reviewId, btn){
+          fetch(`/like/${reviewId}/`,{
+            method:"POST",
+            headers:{'X-CSRFToken': '{{csrf_token}}'}
+          }).then(res=>res.json()).then(data=>{
+            document.getElementById(`like-count-${reviewId}`).innerText = data.likes;
+          });
+        }
+
+        function submitComment(event, reviewId){
+          event.preventDefault();
+          const form = event.target;
+          const text = form.comment.value.trim();
+          if (!text) return;
+          fetch(`/comment/${reviewId}/`,{
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-CSRFToken': '{{csrf_token}}'
+            },
+            body: `comment=${encodeURIComponent(text)}`
+          }).then(res => res.json())
+          .then(data=> {if (data.success){location.reload();}
+        });
+        }
+
+        function showMoreComments(reviewId, button) {
+    fetch(`/comments/${reviewId}/`)
+    .then(response => response.json())
+    .then(comments => {
+        const container = document.getElementById(`comments-${reviewId}`);
+        container.innerHTML = '';  // Clear current comments
+
+        comments.forEach(comment => {
+            const div = document.createElement("div");
+            div.className = "border p-2 mb-2 rounded";
+            div.innerHTML = `
+          <small><strong>${comment.user.username}</strong></small>
+          <p class="mb-0">${comment.text}</p>
+        `;
+            container.appendChild(div);
+        });
+
+        button.style.display = "none";  // Hide the button after loading all
+    });
+}
+function toggleCommentBox(reviewId) {
+    const box = document.getElementById(`comment-box-${reviewId}`);
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  }
+
       </script>
 
       <style>
-        .review.collapsed{
+        .review-text.collapsed{
           overflow: hidden;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
         }
+        .review-card {
+    transition: all 0.3s ease;
+  }
+  
+  .review-card:hover {
+    box-shadow: 0 0 10px rgba(223, 208, 184, 0.3);
+  }
 
       </style>
 {%endblock body%}
