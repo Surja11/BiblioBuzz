@@ -98,3 +98,18 @@ def logoutUser(request):
   return redirect('login')
 
 
+def searchBooks(request):
+  if request.method == "POST":
+    search = request.POST.get("search","").strip()
+  
+    if search:
+      books = Book.objects.filter(book_name__icontains=search)
+     
+      return render(request, 'review/searchResults.html',{'books': books})
+  books = Book.objects.all()
+  return render(request,'review/searchResults.html',{'books': books})
+
+  
+
+
+
