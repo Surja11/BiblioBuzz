@@ -6,7 +6,6 @@
     <h1 class="text-center" style="color:#393F46">{{book.book_name}}</h1>
     <h4 class="text-center" style="color:#393F46">{{book.author.author_name}}</h4>
 
-
     <div class= "row" style="color:#393F46">
       <div class="col-md-4 my-3 d-flex flex-column align-items-center ">
       <img src="{{book.book_img.url}}" class="img-fluid mt-2" style="max-height: 200px; max-width: 180px; object-fit: contain; " >
@@ -22,7 +21,7 @@
 <hr>
 <h3 class="text-center" style="color:#393F46">Reviews</h3>
 {%if not reviews%}
-<div class="alert alert-info text-center">No reviews yet. Be the first to review!</div>
+<div class="alert alert-warning text-center">No reviews yet. Be the first to review!</div>
 {%endif%}
 
           {%for review in reviews%}
@@ -33,35 +32,38 @@
         <p class = "review-text collapsed" id = "review{{forloop.counter}}">{{review.comment}}</p>
         <button class="btn btn-sm" onclick = "toggleReview('review{{forloop.counter}}', this)">Show more</button>
 
-
         <div class="d-flex align-items-center mt-2"> 
           <button class="btn btn-sm me-2 " onclick = "likeReview({{review.id}}, this)">👍Like(<span id="like-count-{{review.id}}">{{review.likes}}</span>)</button>
+          <button class="btn btn-sm" onclick="toggleCommentBox({{review.id}})">💬Comment</button>
+        </div>
 
-
-        <button class="btn btn-sm" onclick="toggleCommentBox({{review.id}})">💬Comment</button></div>
-
-
-        <div id ="comment-box-{{review.id}}" class="mt-2" style="display:none;">
+        <div id="comment-box-{{review.id}}" style="display:none;">
           <div id="comments-{{review.id}}">
-            {%for comment in review.comments.all|slice:":2"%}
-            <div class ="border p-2 mb-1">{{comment.text}}</div>
-
+            {% for comment in review.comments.all|slice:":2" %}
+              <div class="comment-div border border-light rounded p-2 mb-1 mx-5">
+                <span class="fw-bold" style="font-size: 0.8rem; text-decoration: underline;color : #393F46">
+                  {{comment.commenter}}
+                </span>
+                <small class="text-muted">{{comment.created_at|date:"M d, Y"}}</small>
+                <p>{{comment.text}}</p>
+              </div>
+            {% endfor %}
+            
             {% if review.comments.count > 2 %}
-            <button class="btn btn-link p-0" onclick="showMoreComments({{review.id}}, this)">Show more</button>
+              <button class="btn btn-link p-0 show-more-btn" 
+                      onclick="showMoreComments({{review.id}}, this)"
+                      id="show-more-{{review.id}}">
+                Show more
+              </button>
+              <div id="comment-error-{{review.id}}" class="text-danger small" style="display:none;"></div>
             {% endif %}
-            {%endfor%}
-
-
           </div>
 
-        <form onsubmit="submitComment(event, {{review.id}})">
-          <textarea name = "comment" class="form-control mb-2" placeholder="Add a comment"></textarea>
-          <button class="btn btn-sm" type="submit"> Post</button>
+          <form onsubmit="submitComment(event, {{review.id}})">
+            <textarea name="comment" class="form-control mb-2" placeholder="Add a comment" required></textarea>
+            <button class="btn btn-sm" type="submit">Post</button>
           </form>
-          
-        
         </div>
-       
         <hr>
       </div>
       {%endfor%}
@@ -72,105 +74,152 @@
         <form method="post" class="form">
           {% csrf_token %}
           <label for="rating">Give Ratings:</label>
-            <select class="form-control" name = "rating" style="background-color: #DFD0B8;">
-              <option value="1">1<option>
-              <option value="2">2<option>
-              <option value="3">3<option>
-              <option value="4">4<option>
-              <option value="5">5<option>
+            <select class="form-control" name="rating" style="background-color: #DFD0B8;" required>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
             </select>
-<br><br>
-            <label for="comment">Review</label>
-              <textarea cols=50 rows=6 name = "comment" style="background-color: #DFD0B8;" class="form-control"></textarea >
-              <div class="text-center">
-              <input type = "submit"  class="btn m-2" value="Submit" style="background-color: #393E46; color: #DFD0B8">
-              </div>
-
+          <br><br>
+          <label for="comment">Review</label>
+          <textarea cols=50 rows=6 name="comment" style="background-color: #DFD0B8;" class="form-control" required></textarea>
+          <div class="text-center">
+            <input type="submit" class="btn m-2" value="Submit" style="background-color: #393E46; color: #DFD0B8">
+          </div>
         </form>
-      </div>      </div>
+      </div>
+  </div>
 
+  <script>
+    function toggleReview(id, btn){
+      const review = document.getElementById(id);
+      if(review.classList.contains('collapsed')){
+        review.classList.remove('collapsed');
+        btn.innerText = 'Show less';
+      }
+      else{
+        review.classList.add('collapsed');
+        btn.innerText = 'Show more';
+      }
+    }
 
-      <script>
-        function toggleReview(id, btn){
-          const review = document.getElementById(id);
-          if(review.classList.contains('collapsed')){
-            review.classList.remove('collapsed');
-            btn.innerText = 'Show less';
+    function likeReview(reviewId, btn){
+      fetch(`/like/${reviewId}/`,{
+        method:"POST",
+        headers:{'X-CSRFToken': '{{csrf_token}}'}
+      }).then(res=>res.json()).then(data=>{
+        document.getElementById(`like-count-${reviewId}`).innerText = data.likes;
+      });
+    }
+
+    function submitComment(event, reviewId){
+      event.preventDefault();
+      const form = event.target;
+      const text = form.querySelector('textarea[name="comment"]').value.trim();
+      if (!text) return;
+      
+      fetch(`/comment/${reviewId}/`,{
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': '{{csrf_token}}'
+        },
+        body: `comment=${encodeURIComponent(text)}`
+      }).then(res => res.json())
+      .then(data=> {
+        if (data.success){
+          const newComment = document.createElement("div");
+          newComment.className = "border border-light rounded p-2 mb-1 mx-5";
+          newComment.innerHTML = `
+            <span class="fw-bold" style="font-size: 0.8rem; text-decoration: underline; color:#393F46;">
+              ${data.commenter}
+            </span>
+            <small class="text-muted">Just now</small>
+            <p>${data.text}</p>
+          `;
+
+          const container = document.getElementById(`comments-${reviewId}`);
+          const showMoreBtn = container.querySelector('.show-more-btn');
+          
+          if (showMoreBtn) {
+            container.insertBefore(newComment, showMoreBtn);
+          } else {
+            container.appendChild(newComment);
           }
-          else{
-            review.classList.add('collapsed');
-            btn.innerText = 'Show more';
-          }
-        }
 
-        function likeReview(reviewId, btn){
-          fetch(`/like/${reviewId}/`,{
-            method:"POST",
-            headers:{'X-CSRFToken': '{{csrf_token}}'}
-          }).then(res=>res.json()).then(data=>{
-            document.getElementById(`like-count-${reviewId}`).innerText = data.likes;
-          });
+          form.reset();
+          newComment.scrollIntoView({ behavior: 'smooth' });
         }
+      });
+    }
+    
+    function showMoreComments(reviewId, button) {
+    const container = document.getElementById(`comments-${reviewId}`);
+    
+    
+    const lastComment = container.querySelector('.comment-div:last-child') || container.firstChild;
+    
+    fetch(`/comments/${reviewId}/?offset=${container.querySelectorAll('.comment-div').length}&limit=2`)
+        .then(response => response.json())
+        .then(data => {
+            data.comments.forEach(comment => {
+                const commentDiv = document.createElement("div");
+                commentDiv.className = "comment-div border border-light rounded p-2 mb-1 mx-5";
+                commentDiv.innerHTML = `
+                    <span class="fw-bold" style="font-size: 0.8rem; text-decoration: underline;color : #393F46">
+                        ${comment.commenter}
+                    </span>
+                    <small class="text-muted">${comment.created_at}</small>
+                    <p>${comment.text}</p>
+                `;
+                
+              
+                if (lastComment) {
+                    lastComment.parentNode.insertBefore(commentDiv, lastComment.nextSibling);
+                } else {
+                    container.insertBefore(commentDiv, button);
+                }
+            });
 
-        function submitComment(event, reviewId){
-          event.preventDefault();
-          const form = event.target;
-          const text = form.comment.value.trim();
-          if (!text) return;
-          fetch(`/comment/${reviewId}/`,{
-            method: "POST",
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-CSRFToken': '{{csrf_token}}'
-            },
-            body: `comment=${encodeURIComponent(text)}`
-          }).then(res => res.json())
-          .then(data=> {if (data.success){location.reload();}
+            if (!data.has_more) {
+                button.remove();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.textContent = "Error - Click to retry";
+            button.onclick = () => showMoreComments(reviewId, button);
         });
-        }
-
-        function showMoreComments(reviewId, button) {
-    fetch(`/comments/${reviewId}/`)
-    .then(response => response.json())
-    .then(comments => {
-        const container = document.getElementById(`comments-${reviewId}`);
-        container.innerHTML = '';  // Clear current comments
-
-        comments.forEach(comment => {
-            const div = document.createElement("div");
-            div.className = "border p-2 mb-2 rounded";
-            div.innerHTML = `
-          <small><strong>${comment.user.username}</strong></small>
-          <p class="mb-0">${comment.text}</p>
-        `;
-            container.appendChild(div);
-        });
-
-        button.style.display = "none";  // Hide the button after loading all
-    });
 }
-function toggleCommentBox(reviewId) {
-    const box = document.getElementById(`comment-box-${reviewId}`);
-    box.style.display = box.style.display === 'none' ? 'block' : 'none';
-  }
+   
+    function toggleCommentBox(reviewId) {
+      const box = document.getElementById(`comment-box-${reviewId}`);
+      if (box) {
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+  </script>
 
-      </script>
-
-      <style>
-        .review-text.collapsed{
-          overflow: hidden;
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-        }
-        .review-card {
-    transition: all 0.3s ease;
-  }
-  
-  .review-card:hover {
-    box-shadow: 0 0 10px rgba(223, 208, 184, 0.3);
-  }
-
-      </style>
-{%endblock body%}
-
+  <style>
+    .review-text.collapsed{
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .review-card {
+      transition: all 0.3s ease;
+    }
+    .review-card:hover {
+      box-shadow: 0 0 10px rgba(223, 208, 184, 0.3);
+    }
+    .show-more-btn {
+      color: #DFD0B8;
+      text-decoration: none;
+    }
+    .show-more-btn:hover {
+      text-decoration: underline;
+    }
+  </style>
+{% endblock body %}

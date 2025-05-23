@@ -115,6 +115,7 @@ def searchBooks(request):
 
 def like_review(request, review_id):
   if request.method == "POST":
+    
     review = Review.objects.get(id = review_id)
     review.likes += 1
     review.save()
@@ -129,12 +130,29 @@ def review_comment(request, review_id):
       print("got comment"+comment)
       Comment.objects.create(review_id = review_id,commenter=request.user, text = comment)
       print("comment saved")
-      return JsonResponse({'status': 'success'})
+      return JsonResponse({'status': 'success',
+                           'commenter': request.user.username,
+                           'text': comment})
     return redirect('login')
   
 
-def get_all_comments(request, review_id):
-  if request.method == "GET":
-    review = Review.objects.get(id  = review_id)
-    comments = review.comments.order_by('-created_at').all()
-    return JsonResponse(list(comments), safe = False)
+def get_comments(request, review_id):
+    offset = int(request.GET.get('offset', 0))
+    limit = int(request.GET.get('limit', 2))
+    
+    comments = Comment.objects.filter(review_id=review_id).order_by('-id')[offset:offset+limit]
+    
+    comments_data = [{
+      
+        'commenter': comment.commenter.username,
+        'text': comment.text,
+        'created_at': comment.created_at.strftime('%b %d, %Y')
+    } for comment in comments]
+    
+    return JsonResponse({
+        'status': 'success',
+        'comments': comments_data,
+        'has_more': comments.count() >= limit,
+        'offset':offset,
+        'limit': limit
+    })
