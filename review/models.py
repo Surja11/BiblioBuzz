@@ -96,8 +96,8 @@ class Comment(models.Model):
 
 
 class Profile(models.Model):
-  username = models.ForeignKey(User, on_delete=models.CASCADE)
+  user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key = True, db_column='user_id')
+  image = models.ImageField(upload_to="media/review/images", null=True)
   bio = models.TextField(null=True)
   favorite_book = models.TextField(blank=True)
-  review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="profile")
 

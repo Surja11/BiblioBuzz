@@ -156,3 +156,12 @@ def get_comments(request, review_id):
         'offset':offset,
         'limit': limit
     })
+
+def profile(request, profile_id):
+  try: 
+    profile = Profile.objects.get(user_id = profile_id)
+  except Profile.DoesNotExist:
+    user = User.objects.get(id = profile_id)
+    profile = Profile.objects.create(user = user)
+  review = Review.objects.filter(id = profile_id)
+  return render(request, "review/profile.html",{'profile':profile,'review': review})
