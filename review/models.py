@@ -50,6 +50,7 @@ class User(AbstractBaseUser):
   def has_module_perms(self, app_label):
     return self.is_superuser
 
+
 class Author(models.Model):
   author_name = models.CharField(max_length=200)
   bio = models.TextField()
@@ -92,3 +93,11 @@ class Comment(models.Model):
   commenter = models.ForeignKey(User, on_delete = models.CASCADE, related_name="comments")
   text = models.TextField()
   created_at = models.DateTimeField(auto_now_add = True)
+
+
+class Profile(models.Model):
+  username = models.ForeignKey(User, on_delete=models.CASCADE)
+  bio = models.TextField(null=True)
+  favorite_book = models.TextField(blank=True)
+  review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name="profile")
+
