@@ -10,7 +10,9 @@
 
     <div class= "row" style="color:#393F46">
       <div class="col-md-4 my-3 d-flex flex-column align-items-center ">
+        {%if profile.image.url is not None%}
       <img src="{{profile.image.url}}" class="img-fluid mt-2" style="max-height: 200px; max-width: 200px; object-fit: contain; border-radius: 50%;"  >
+      {%endif%}
      
       </div>
       <div class="col-md-8 my-3 mt-4">
