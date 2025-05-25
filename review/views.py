@@ -163,5 +163,22 @@ def profile(request, profile_id):
   except Profile.DoesNotExist:
     user = User.objects.get(id = profile_id)
     profile = Profile.objects.create(user = user)
-  review = Review.objects.filter(id = profile_id)
-  return render(request, "review/profile.html",{'profile':profile,'review': review})
+  review = Review.objects.filter(user = profile.user).order_by('-created_at')
+  return render(request, "review/profile.html",{'profile':profile,'reviews': review})
+
+def editProfile(request, profile_id):
+  profile = Profile.objects.get(user_id = profile_id)
+  if request.user != profile.user:
+        messages.error(request, "You can't edit this profile.")
+        return redirect('profile')
+  
+  if request.method == "POST":
+    profileForm = ProfileForm(request.POST, request.FILES)
+    if profileForm.is_valid():
+      profileInfo = profileForm.save(commit = False)
+      print('saved')
+      profileInfo.user = request.user
+      profileInfo.save()
+      return redirect('profile', profile_id = profile_id)
+  profileForm = ProfileForm()
+  return render(request,'review/editProfile.html',{'form': profileForm,'profile': profile})

@@ -74,6 +74,8 @@ class Book(models.Model):
   short_description = models.TextField()
   book_img = models.ImageField(upload_to="media/review/images")
   
+  def __str__(self):
+    return self.book_name
 
 class Review(models.Model):
   book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name = "reviews")

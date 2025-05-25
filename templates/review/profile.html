@@ -5,12 +5,12 @@
   <div class="container" style="color:rgb(237, 235, 227);">
     <div class="d-flex flex-row justify-content-around align-items-center">
     <h1 class="text-center" style="color:#393F46">{{profile.user.username}}</h1>
-    <a class="btn  rounded " style="background-color: #393E46;color:#DFD0B8" href="">Edit Profile</a>
+    <a class="btn  rounded " style="background-color: #393E46;color:#DFD0B8" href="{%url 'editProfile' profile.user_id%}">Edit Profile</a>
     </div>
 
     <div class= "row" style="color:#393F46">
       <div class="col-md-4 my-3 d-flex flex-column align-items-center ">
-      <img src="{{profile.image}}" class="img-fluid mt-2" style="max-height: 200px; max-width: 200px; object-fit: contain; border-radius: 50%;"  >
+      <img src="{{profile.image.url}}" class="img-fluid mt-2" style="max-height: 200px; max-width: 200px; object-fit: contain; border-radius: 50%;"  >
      
       </div>
       <div class="col-md-8 my-3 mt-4">
@@ -30,8 +30,9 @@
 <div class="alert alert-warning text-center">You have not posted any review yet!</div>
 {%endif%}
 
-          {%for review in profile.review%}
+          {%for review in reviews%}
       <div class="review-card mb-2 p-2 rounded">
+        <p class="fw-bold" style="color:#393F46">{{review.book}}</p>
         <span class="fw-bold" style="color:#393F46">{{review.user.username}}</span>
         
         <span class="fw-bold" style="color:#393F46">{{review.rating}} stars</span>

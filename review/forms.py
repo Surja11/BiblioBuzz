@@ -26,6 +26,14 @@ class RegistrationForm(forms.ModelForm):
       
 
 
+class ProfileForm(forms.ModelForm):
+  class Meta:
+    model = Profile
+    fields = ["image","bio","favorite_book"]
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['image'].widget.attrs.update({'class':'form-control-file'})
 
 
 
