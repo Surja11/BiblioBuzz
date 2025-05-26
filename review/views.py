@@ -182,3 +182,11 @@ def editProfile(request, profile_id):
       return redirect('profile', profile_id = profile_id)
   profileForm = ProfileForm()
   return render(request,'review/editProfile.html',{'form': profileForm,'profile': profile})
+
+@login_required
+def deleteReview(request, review_id):
+  review = get_object_or_404(Review,id = review_id)
+  if request.user == review.user:
+    review.delete()
+    return redirect("profile",profile_id =request.user.id )
+  return redirect("profile",profile_id =request.user.id)

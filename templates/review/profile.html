@@ -40,6 +40,7 @@
         <span class="fw-bold" style="color:#393F46">{{review.rating}} stars</span>
         <p class = "review-text collapsed" id = "review{{forloop.counter}}">{{review.comment}}</p>
         <button class="btn btn-sm" onclick = "toggleReview('review{{forloop.counter}}', this)">Show more</button>
+        <a class="btn btn-sm float-end" href="{%url 'delete' review.id%}" onclick="return confirm('Are you sure?')">Delete</a>
 
         <div class="d-flex align-items-center mt-2"> 
           <button class="btn btn-sm me-2 " onclick = "likeReview({{review.id}}, this)">👍Like(<span id="like-count-{{review.id}}">{{review.likes}}</span>)</button>
@@ -77,6 +78,41 @@
       </div>
       {%endfor%}
       
-      
+      <script>
+    function toggleReview(id, btn){
+      const review = document.getElementById(id);
+      if(review.classList.contains('collapsed')){
+        review.classList.remove('collapsed');
+        btn.innerText = 'Show less';
+      }
+      else{
+        review.classList.add('collapsed');
+        btn.innerText = 'Show more';
+      }
+    }
+
+  </script>
+
+   <style>
+    .review-text.collapsed{
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .review-card {
+      transition: all 0.3s ease;
+    }
+    .review-card:hover {
+      box-shadow: 0 0 10px rgba(223, 208, 184, 0.3);
+    }
+    .show-more-btn {
+      color: #DFD0B8;
+      text-decoration: none;
+    }
+    .show-more-btn:hover {
+      text-decoration: underline;
+    }
+  </style>
 
 {% endblock body %}
