@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db.models import Avg
 # Create your models here.
 
 class UserManager(BaseUserManager):
@@ -73,9 +74,15 @@ class Book(models.Model):
   published_date = models.DateField()
   short_description = models.TextField()
   book_img = models.ImageField(upload_to="media/review/images")
-  
+  avg_rating = models.FloatField(default=0.0)
+
   def __str__(self):
     return self.book_name
+
+  def update_avg_rating(self):
+    avg = self.reviews.aggregate(Avg('rating'))['rating__avg']
+    self.avg_rating = avg if avg is not None else 0.0
+    self.save()
 
 class Review(models.Model):
   book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name = "reviews")
