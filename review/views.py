@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Count
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 # login_required
 # Create your views here.
 
@@ -18,7 +19,7 @@ def home(request):
 
   trending = Book.objects.annotate(
     recent_reviews = Count('reviews',filter = models.Q(reviews__created_at__gte = timezone.now()-timezone.timedelta(days = 30)))
-  ).order_by('-recent_reviews')[:5]
+  ).order_by('-recent_reviews')[:4]
   reviews = Review.objects.all()
   context = {
     'most_popular':most_popular,
@@ -116,9 +117,14 @@ def searchBooks(request):
     search = request.POST.get("search","").strip()
   
     if search:
-      books = Book.objects.filter(book_name__icontains=search)
+      books = Book.objects.filter(book_name__icontains=search).order_by('published_date')
+
+      paginator = Paginator(books, per_page = 8,orphans =1)
+      page_number = request.GET.get('page')
+      page_obj = paginator.get_page(page_number)
+
      
-      return render(request, 'review/searchResults.html',{'books': books})
+      return render(request, 'review/searchResults.html',{'page_obj': page_obj})
   books = Book.objects.all()
   return render(request,'review/searchResults.html',{'books': books})
 
@@ -201,3 +207,12 @@ def deleteReview(request, review_id):
     review.delete()
     return redirect("profile",profile_id =request.user.id )
   return redirect("profile",profile_id =request.user.id)
+
+
+def  allBooks(request):
+  books = Book.objects.all().order_by('published_date')
+  paginator = Paginator(books, per_page=12,orphans=1)
+  page_number = request.GET.get('page')
+  page_obj = paginator.get_page(page_number)
+  return render(request, 'review/searchResults.html',{'page_obj':page_obj,
+    'books': books})
