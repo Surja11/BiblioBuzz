@@ -4,15 +4,26 @@ from .forms import *
 from .models import *
 from django.contrib.auth import logout,authenticate,login
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.db.models import Count
 from django.http import JsonResponse
 # login_required
 # Create your views here.
 
 def home(request):
-  books = Book.objects.all()
+
+  recently_added = Book.objects.filter(created_at__gte=timezone.now()- timezone.timedelta(days = 7)).order_by('created_at')[:4]
+
+  most_popular = Book.objects.all().order_by('-avg_rating')[:4]
+
+  trending = Book.objects.annotate(
+    recent_reviews = Count('reviews',filter = models.Q(reviews__created_at__gte = timezone.now()-timezone.timedelta(days = 30)))
+  ).order_by('-recent_reviews')[:5]
   reviews = Review.objects.all()
   context = {
-    'books': books,
+    'most_popular':most_popular,
+    'trending': trending,
+    'recently_added': recently_added, 
     'reviews':reviews
   }
   return render(request, 'review/home.html',context)

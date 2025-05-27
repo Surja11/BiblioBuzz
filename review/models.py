@@ -72,6 +72,7 @@ class Book(models.Model):
   publication = models.CharField(max_length = 200)
   genres = models.ManyToManyField(Genre, blank = True)
   published_date = models.DateField()
+  created_at = models.DateTimeField(auto_now_add=True)
   short_description = models.TextField()
   book_img = models.ImageField(upload_to="media/review/images")
   avg_rating = models.FloatField(default=0.0)
