@@ -77,6 +77,7 @@
         <hr>
       </div>
       {%endfor%}
+    </div>
       
       <script>
     function toggleReview(id, btn){
@@ -91,9 +92,109 @@
       }
     }
 
+  function likeReview(reviewId, btn){
+      fetch(`/like/${reviewId}/`,{
+        method:"POST",
+        headers:{'X-CSRFToken': '{{csrf_token}}'}
+      })
+      .then(res=>res.json()).
+      then(data=>
+      {
+        document.getElementById(`like-count-${reviewId}`).innerText = data.likes;
+
+       
+    });
+    }
+
+    function submitComment(event, reviewId){
+      event.preventDefault();
+      const form = event.target;
+      const text = form.querySelector('textarea[name="comment"]').value.trim();
+      if (!text) return;
+      
+      fetch(`/comment/${reviewId}/`,{
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': '{{csrf_token}}'
+        },
+        body: `comment=${encodeURIComponent(text)}`
+      }).then(res => res.json())
+      .then(data=> {
+        if (data.success){
+          const newComment = document.createElement("div");
+          newComment.className = "border border-light rounded p-2 mb-1 mx-5";
+          newComment.innerHTML = `
+            <span class="fw-bold" style="font-size: 0.8rem; text-decoration: underline; color:#393F46;">
+              ${data.commenter}
+            </span>
+            <small class="text-muted">Just now</small>
+            <p>${data.text}</p>
+          `;
+
+          const container = document.getElementById(`comments-${reviewId}`);
+          const showMoreBtn = container.querySelector('.show-more-btn');
+          
+          if (showMoreBtn) {
+            container.insertBefore(newComment, showMoreBtn);
+          } else {
+            container.appendChild(newComment);
+          }
+
+          form.reset();
+          newComment.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    }
+    
+    function showMoreComments(reviewId, button) {
+    const container = document.getElementById(`comments-${reviewId}`);
+    
+    
+    const lastComment = container.querySelector('.comment-div:last-child') || container.firstChild;
+    
+    fetch(`/comments/${reviewId}/?offset=${container.querySelectorAll('.comment-div').length}&limit=2`)
+        .then(response => response.json())
+        .then(data => {
+            data.comments.forEach(comment => {
+                const commentDiv = document.createElement("div");
+                commentDiv.className = "comment-div border border-light rounded p-2 mb-1 mx-5";
+                commentDiv.innerHTML = `
+                    <span class="fw-bold" style="font-size: 0.8rem; text-decoration: underline;color : #393F46">
+                        ${comment.commenter}
+                    </span>
+                    <small class="text-muted">${comment.created_at}</small>
+                    <p>${comment.text}</p>
+                `;
+                
+              
+                if (lastComment) {
+                    lastComment.parentNode.insertBefore(commentDiv, lastComment.nextSibling);
+                } else {
+                    container.insertBefore(commentDiv, button);
+                }
+            });
+
+            if (!data.has_more) {
+                button.remove();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.textContent = "Error - Click to retry";
+            button.onclick = () => showMoreComments(reviewId, button);
+        });
+}
+   
+    function toggleCommentBox(reviewId) {
+      const box = document.getElementById(`comment-box-${reviewId}`);
+      if (box) {
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      }
+    }
   </script>
 
-   <style>
+  <style>
     .review-text.collapsed{
       overflow: hidden;
       display: -webkit-box;

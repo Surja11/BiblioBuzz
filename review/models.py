@@ -93,6 +93,7 @@ class Review(models.Model):
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
   likes = models.IntegerField(default=0)
+  liked_by = models.ManyToManyField(User, related_name="liked_reviews", blank = True)
   
 
   class Meta:

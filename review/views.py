@@ -140,11 +140,18 @@ def booksByGenre(request,genre_name):
 
 def like_review(request, review_id):
   if request.method == "POST":
-    
     review = Review.objects.get(id = review_id)
-    review.likes += 1
+    user = request.user
+    if user in review.liked_by.all():
+      review.likes -=1
+      review.liked_by.remove(user)
+      action = 'unliked'
+    else:
+      review.likes += 1
+      review.liked_by.add(user)
+      action = 'liked'
     review.save()
-    return JsonResponse({'likes': review.likes})
+    return JsonResponse({'likes': review.likes,'action':action})
 
 
 def review_comment(request, review_id):

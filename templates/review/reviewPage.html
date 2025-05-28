@@ -107,9 +107,14 @@
       fetch(`/like/${reviewId}/`,{
         method:"POST",
         headers:{'X-CSRFToken': '{{csrf_token}}'}
-      }).then(res=>res.json()).then(data=>{
+      })
+      .then(res=>res.json()).
+      then(data=>
+      {
         document.getElementById(`like-count-${reviewId}`).innerText = data.likes;
-      });
+
+       
+    });
     }
 
     function submitComment(event, reviewId){
