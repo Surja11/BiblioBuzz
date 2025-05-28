@@ -5,7 +5,7 @@ from .models import *
 from django.contrib.auth import logout,authenticate,login
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count,Q
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 # login_required
@@ -116,21 +116,26 @@ def logoutUser(request):
 
 
 def searchBooks(request):
-  if request.method == "POST":
-    search = request.POST.get("search","").strip()
-  
+    search = request.GET.get("search","").strip()
+    
+    books = Book.objects.all()
     if search:
-      books = Book.objects.filter(book_name__icontains=search).order_by('published_date')
+      books = books.filter(Q(book_name__icontains=search)|Q(author__author_name__icontains = search)).order_by('published_date')
 
-      paginator = Paginator(books, per_page = 8,orphans =1)
-      page_number = request.GET.get('page')
-      page_obj = paginator.get_page(page_number)
+    paginator = Paginator(books, per_page = 8,orphans =1)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
      
-      return render(request, 'review/searchResults.html',{'page_obj': page_obj})
-  books = Book.objects.all()
-  return render(request,'review/searchResults.html',{'books': books})
-
+    return render(request, 'review/searchResults.html',{'page_obj': page_obj,'search': search})
+  
+def booksByGenre(request,genre_name):
+  genre = Genre.objects.get(genre_name__iexact = genre_name)
+  books = Book.objects.filter(genres= genre).order_by('-published_date')
+  paginator = Paginator(books, per_page = 8,orphans = 1)
+  page_number =  request.GET.get('page')
+  page_obj = paginator.get_page(page_number)
+  return render(request,'review/searchResults.html',{'page_obj': page_obj,'title':genre.genre_name})
   
 
 def like_review(request, review_id):

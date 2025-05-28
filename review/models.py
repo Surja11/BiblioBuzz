@@ -68,7 +68,7 @@ class Genre(models.Model):
 
 class Book(models.Model):
   book_name = models.CharField(max_length= 200)
-  author = models.ForeignKey(Author, on_delete=models.CASCADE)
+  author = models.ForeignKey(Author, on_delete=models.CASCADE,related_name="books")
   publication = models.CharField(max_length = 200)
   genres = models.ManyToManyField(Genre, blank = True)
   published_date = models.DateField()
@@ -111,3 +111,7 @@ class Profile(models.Model):
   bio = models.TextField(null=True)
   favorite_book = models.TextField(blank=True)
 
+
+
+
+  

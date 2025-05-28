@@ -8,6 +8,7 @@ urlpatterns = [
   path('login/', views.userLogin, name="login"),
   path('logout/', views.logoutUser, name = "logout"),
   path('search/',views.searchBooks, name = "search"),
+  path('genre/<str:genre_name>/',views.booksByGenre, name ='booksByGenre'),
   path('like/<int:review_id>/',views.like_review, name = "like_review"),
   path('comment/<int:review_id>/',views.review_comment,name="review_comment"),
   path("comments/<int:review_id>/", views.get_comments,name = "get_comments"),
