@@ -127,7 +127,7 @@ def searchBooks(request):
     page_obj = paginator.get_page(page_number)
 
      
-    return render(request, 'review/searchResults.html',{'page_obj': page_obj,'search': search})
+    return render(request, 'review/searchResults.html',{'page_obj': page_obj,'title': search})
   
 def booksByGenre(request,genre_name):
   genre = Genre.objects.get(genre_name__iexact = genre_name)
@@ -218,9 +218,9 @@ def deleteReview(request, review_id):
 
 
 def  allBooks(request):
-  books = Book.objects.all().order_by('published_date')
+  books = Book.objects.all().order_by('-published_date')
   paginator = Paginator(books, per_page=12,orphans=1)
   page_number = request.GET.get('page')
   page_obj = paginator.get_page(page_number)
   return render(request, 'review/searchResults.html',{'page_obj':page_obj,
-    'books': books})
+    'books': books,'title':'All Books'})
