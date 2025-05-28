@@ -13,7 +13,10 @@ from django.core.paginator import Paginator
 
 def home(request):
 
-  recently_added = Book.objects.filter(created_at__gte=timezone.now()- timezone.timedelta(days = 7)).order_by('created_at')[:4]
+  recently_added = Book.objects.filter(created_at__gte=timezone.now()- timezone.timedelta(days = 7)).order_by('-created_at')[:4]
+
+  if not recently_added:
+    recently_added = Book.objects.order_by('-created_at')[:4]
 
   most_popular = Book.objects.all().order_by('-avg_rating')[:4]
 
@@ -43,7 +46,7 @@ def reviewPage(request, id):
 
       existing_review = Review.objects.filter(book = book, user = request.user).first()
       if existing_review:
-        messages.errror(request, "You have already reviewed this book.")
+        messages.error(request, "You have already reviewed this book.")
       else:
         Review.objects.create(
           book = book,
