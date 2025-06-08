@@ -1,3 +1,21 @@
 nav a{
   color: white;
 }
+nav{
+  position: fixed;
+  top: 0;
+}
+
+.hover-effect {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: rgba(223, 206, 179, 0.27);
+  border-radius: 20px;
+
+}
+
+.hover-effect:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background-color: rgba(223, 203, 171, 0.5); 
+  border: 1px solid #f4e8e8;
+}

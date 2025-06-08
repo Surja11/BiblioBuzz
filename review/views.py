@@ -13,16 +13,16 @@ from django.core.paginator import Paginator
 
 def home(request):
 
-  recently_added = Book.objects.filter(created_at__gte=timezone.now()- timezone.timedelta(days = 7)).order_by('-created_at')[:4]
+  recently_added = Book.objects.filter(created_at__gte=timezone.now()- timezone.timedelta(days = 7)).order_by('-created_at')[:8]
 
   if not recently_added:
-    recently_added = Book.objects.order_by('-created_at')[:4]
+    recently_added = Book.objects.order_by('-created_at')[:8]
 
-  most_popular = Book.objects.all().order_by('-avg_rating')[:4]
+  most_popular = Book.objects.all().order_by('-avg_rating')[:10]
 
   trending = Book.objects.annotate(
     recent_reviews = Count('reviews',filter = models.Q(reviews__created_at__gte = timezone.now()-timezone.timedelta(days = 30)))
-  ).order_by('-recent_reviews')[:4]
+  ).order_by('-recent_reviews')[:8]
   reviews = Review.objects.all()
   context = {
     'most_popular':most_popular,
