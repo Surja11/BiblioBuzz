@@ -54,7 +54,7 @@ It provides a simple, user-friendly platform where users can browse books, write
 
 1. **Clone the Repository**
 
-      git clone https://github.com/your-username/Bibliobuzz.git
+      git clone https://github.com/Surja11/Bibliobuzz.git
       cd Bibliobuzz
 
 2. **Create a Virtual Environment**
@@ -95,4 +95,5 @@ It provides a simple, user-friendly platform where users can browse books, write
 7. **Access the Application**
 
       Open your browser and go to:
+
       http://127.0.0.1:8000/
